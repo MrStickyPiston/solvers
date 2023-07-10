@@ -10,11 +10,14 @@ def clear():
 
 
 class SudokuSolver:
-    def __init__(self, grid, row_size=9, column_size=9):
+    def __init__(self, grid, row_size=9, column_size=9, row_block_size=3, col_block_size=3):
         self.grid = grid
 
         self.row_size = row_size
         self.column_size = column_size
+
+        self.row_block_size = row_block_size
+        self.col_block_size = col_block_size
 
     def find_empty(self):
         for row in range(self.column_size):
@@ -25,21 +28,21 @@ class SudokuSolver:
     def check(self, num, pos):
         row, col = pos
         # Check if all row elements include this number
-        for j in range(self.row_size):
+        for j in range(self.column_size):
             if self.grid[row][j] == num:
                 return False
 
         # Check if all column elements include this number
-        for i in range(self.column_size):
+        for i in range(self.row_size):
             if self.grid[i][col] == num:
                 return False
 
         # Check if the number is already included in the block
-        row_block_start = 3 * (row // 3)
-        col_block_start = 3 * (col // 3)
+        row_block_start = self.row_block_size * (row // self.row_block_size)
+        col_block_start = self.col_block_size * (col // self.col_block_size)
 
-        row_block_end = row_block_start + 3
-        col_block_end = col_block_start + 3
+        row_block_end = row_block_start + self.col_block_size
+        col_block_end = col_block_start + self.row_block_size
         for i in range(row_block_start, row_block_end):
             for j in range(col_block_start, col_block_end):
                 if self.grid[i][j] == num:
@@ -72,20 +75,32 @@ class SudokuSolver:
 
         for i in self.grid:
             for j in i:
-                if counter % 3 == 0:
-                    if counter % (3 * len(self.grid[0])) == 0:
-                        visualized += "\n"
+                if counter % self.row_block_size == 0:
                     visualized += " "
+
+                if counter % self.column_size == 0:
+                    visualized += "\n"
+
+                if counter % (self.col_block_size * self.column_size) == 0:
+                    visualized += "\n"
 
                 visualized += f"{j} "
                 counter += 1
-            visualized += "\n"
 
         return visualized
 
 
-grid = np.zeros([9, 9], dtype='int8')
-sudoku = SudokuSolver(grid)
+row_size = 9
+col_size = 9
+row_block_size = 3
+col_block_size = 3
+
+grid = np.zeros([row_size, col_size], dtype='int8')
+sudoku = SudokuSolver(grid,
+                      row_size=row_size,
+                      column_size=col_size,
+                      row_block_size=row_block_size,
+                      col_block_size=col_block_size)
 
 print(sudoku.visualize())
 sudoku.solve()
